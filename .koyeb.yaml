@@ -1,0 +1,39 @@
+# .koyeb.yaml
+name: laravel-koyeb
+region: washington-dc
+
+services:
+  - name: app
+    type: web
+    build:
+      builder: heroku/buildpacks:20
+      build_command: |
+        composer install --no-dev --optimize-autoloader
+        php artisan config:clear
+        php artisan route:clear
+        php artisan view:clear
+        npm ci
+        npm run build
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+    run_command: |
+      php artisan migrate --force
+      php artisan serve --host=0.0.0.0 --port=$PORT
+    env:
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: https://{{service.host}}
+      LOG_CHANNEL: stack
+      LOG_LEVEL: info
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      DB_CONNECTION: pgsql
+      DB_HOST: ep-dawn-cloud-a4bqea0t.us-east-1.pg.koyeb.app
+      DB_PORT: 5432
+      DB_DATABASE: koyebdb
+      DB_USERNAME: koyeb-adm
+      DB_PASSWORD: npg_WiohN7r0XvEP
+      NPM_CONFIG_PRODUCTION: false
+      PHP_CLI_SERVER_WORKERS: 4
